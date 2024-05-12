@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edzésterv generátor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        form {
+            max-width: 400px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        select,
+        input[type="number"],
+        input[type="range"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        #weight-label,
+        #weight-slider,
+        #weight-output {
+            display: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4caf50;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>Edzésterv generátor</h1>
+    <form id="workout-form" method="POST">
+        <label for="goal">Cél:</label>
+        <select name="goal" id="goal">
+            <option value="Izom növelés" selected>Izom növelés</option>
+            <option value="Fogyás">Fogyás</option>
+        </select>
+        <br>
+        <label for="weeks">Hetek:</label>
+        <input type="range" name="weeks" id="weeks-slider" min="1" max="12" value="1">
+        <output for="weeks-slider" id="weeks-output">1</output>
+        <br>
+        <label for="weight" id="weight-label">Fogyás (kg):</label>
+        <input type="range" name="weight" id="weight-slider" min="1" max="10">
+        <output for="weight-slider" id="weight-output">1</output>
+        <br>
+        <label for="location">Sportolási helyszín:</label>
+        <select name="location" id="location">
+            <option value="Szabadban">Szabadban</option>
+            <option value="Otthon">Otthon</option>
+            <option value="Edzőterem">Edzőterem</option>
+        </select>
+        <br>
+        <button type="submit">Generálás</button>
+    </form>
+<script>
+    // Hetek csúszka kezelése
+    const weeksSlider = document.getElementById('weeks-slider');
+    const weeksOutput = document.getElementById('weeks-output');
+    weeksOutput.innerHTML = weeksSlider.value;
+
+    weeksSlider.oninput = function() {
+        weeksOutput.innerHTML = this.value;
+        updateOutputPosition(weeksOutput, weeksSlider);
+    };
+
+    // Fogyás (kg) csúszka kezelése
+    const weightSlider = document.getElementById('weight-slider');
+    const weightOutput = document.getElementById('weight-output');
+    weightOutput.innerHTML = weightSlider.value;
+
+    weightSlider.oninput = function() {
+        weightOutput.innerHTML = this.value;
+        updateOutputPosition(weightOutput, weightSlider);
+    };
+
+    // Fogyás cél kiválasztásának kezelése
+    const goalSelect = document.getElementById('goal');
+    const weightLabel = document.getElementById('weight-label');
+
+    goalSelect.onchange = function() {
+        if (this.value === 'Fogyás') {
+            weightLabel.style.display = 'block';
+            weightSlider.style.display = 'block';
+            weightOutput.style.display = 'block';
+        } else {
+            weightLabel.style.display = 'none';
+            weightSlider.style.display = 'none';
+            weightOutput.style.display = 'none';
+        }
+    };
+
+    // Segédfüggvény a kimeneti elem pozíciójának frissítéséhez
+    function updateOutputPosition(output, slider) {
+        const newPosition = (slider.offsetWidth - output.offsetWidth) * (slider.value - slider.min) / (slider.max - slider.min);
+        output.style.transform = 'translateX(' + newPosition + 'px)';
+    }
+</script>
+
+</body>
+</html>
