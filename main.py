@@ -20,7 +20,7 @@ def format_workout_plan(plan):
 
     This function takes a workout plan as input and formats it for display in the HTML template.
     It does this by splitting the plan into lines, stripping whitespace from each line, and removing any empty lines.
-    It then wraps each line in a <span> tag with the class "task" if the line starts with a dash, or a <p> tag otherwise.
+    It then wraps each line in a <li> tag within a <ul> if the line starts with a dash, or a <p> tag otherwise.
 
     Args:
         plan (str): The workout plan to be formatted.
@@ -31,8 +31,23 @@ def format_workout_plan(plan):
     weeks_split = plan.split("\n")
     weeks_split = [week.strip() for week in weeks_split]
     weeks_split = [week for week in weeks_split if week]
-    weeks_split = ['<span class="task">' + week + '</span>' if week.startswith('-') else '<p>' + week + '</p>' for week in weeks_split]
-    return weeks_split
+
+    formatted_plan = []
+    for week in weeks_split:
+        if week.startswith('-'):
+            if formatted_plan and not formatted_plan[-1].endswith('</ul>'):
+                formatted_plan.append('</ul>')
+            if not formatted_plan or not formatted_plan[-1].endswith('</ul>'):
+                formatted_plan.append('<ul>')
+            formatted_plan.append('<li>' + week[1:] + '</li>')  # remove the dash
+        else:
+            if formatted_plan and formatted_plan[-1].endswith('</ul>'):
+                formatted_plan.append('</ul>')
+            formatted_plan.append('<p>' + week + '</p>')
+    if formatted_plan and not formatted_plan[-1].endswith('</ul>'):
+        formatted_plan.append('</ul>')
+
+    return formatted_plan
 
 @app.route("/", methods=["GET", "POST"])
 def index():
@@ -53,7 +68,7 @@ def index():
         weeks = int(request.form.get("weeks"))
         goal = request.form.get("goal")
         location = request.form.get("location")
-        weight_to_lose = int(request.form.get("weight")) if goal == "Fogyás" else None
+        weight_to_lose = int(request.form.get("weight")) if goal == "Weight loss" else None
         formatted_response = asyncio.run(generate_and_send_message(weeks, goal, location, weight_to_lose))
         return render_template("result.html", response=formatted_response)
     return render_template("index.html")
@@ -68,9 +83,9 @@ async def generate_and_send_message(weeks, goal, location, weight_to_lose=None):
 
     Args:
         weeks (int): The number of weeks for the workout plan.
-        goal (str): The fitness goal for the workout plan. Can be "Fogyás" (weight loss) or "Izom növelés" (muscle gain).
+        goal (str): The fitness goal for the workout plan. Can be "Weight loss" or "Muscle gain".
         location (str): The location where the workouts will be performed.
-        weight_to_lose (int, optional): The amount of weight to lose in kilograms. Only required if the goal is "Fogyás".
+        weight_to_lose (int, optional): The amount of weight to lose in kilograms. Only required if the goal is "Weight loss".
 
     Returns:
         list: The formatted workout plan.
@@ -92,17 +107,17 @@ async def generate_workout_plan(weeks, goal, location, weight_to_lose=None):
 
     Args:
         weeks (int): The number of weeks for the workout plan.
-        goal (str): The fitness goal for the workout plan. Can be "Fogyás" (weight loss) or "Izom növelés" (muscle gain).
+        goal (str): The fitness goal for the workout plan. Can be "Weight loss" or "Muscle gain".
         location (str): The location where the workouts will be performed.
-        weight_to_lose (int, optional): The amount of weight to lose in kilograms. Only required if the goal is "Fogyás".
+        weight_to_lose (int, optional): The amount of weight to lose in kilograms. Only required if the goal is "Weight loss".
 
     Returns:
         list: The formatted workout plan.
     """
-    if goal == "Fogyás":
-        message = f"Készíts {weeks}-hetes edzéstervet, hogy {weight_to_lose} kilogrammot veszíts el {location}ban."
-    elif goal == "Izom növelés":
-        message = f"Készíts {weeks}-hetes edzéstervet izomnöveléshez {location}ban."
+    if goal == "Weight loss":
+        message = f"Create a {weeks}-week workout plan to lose {weight_to_lose} kilograms at {location}."
+    elif goal == "Muscle gain":
+        message = f"Create a {weeks}-week workout plan for muscle gain at {location}."
 
     send_message_to_thread(message)
     run = client.beta.threads.runs.create(thread_id=thread_id, assistant_id=assistant_id,

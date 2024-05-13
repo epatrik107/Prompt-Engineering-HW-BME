@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="hu">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edzésterv generátor</title>
+    <title>Workout Plan Generator</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -66,33 +66,33 @@
     </style>
 </head>
 <body>
-    <h1>Edzésterv generátor</h1>
+    <h1>Workout Plan Generator</h1>
     <form id="workout-form" method="POST">
-        <label for="goal">Cél:</label>
+        <label for="goal">Goal:</label>
         <select name="goal" id="goal">
-            <option value="Izom növelés" selected>Izom növelés</option>
-            <option value="Fogyás">Fogyás</option>
+            <option value="Muscle gain" selected>Muscle gain</option>
+            <option value="Weight loss">Weight loss</option>
         </select>
         <br>
-        <label for="weeks">Hetek:</label>
+        <label for="weeks">Weeks:</label>
         <input type="range" name="weeks" id="weeks-slider" min="1" max="12" value="1">
         <output for="weeks-slider" id="weeks-output">1</output>
         <br>
-        <label for="weight" id="weight-label">Fogyás (kg):</label>
+        <label for="weight" id="weight-label">Weight loss (kg):</label>
         <input type="range" name="weight" id="weight-slider" min="1" max="10">
         <output for="weight-slider" id="weight-output">1</output>
         <br>
-        <label for="location">Sportolási helyszín:</label>
+        <label for="location">Workout location:</label>
         <select name="location" id="location">
-            <option value="Szabadban">Szabadban</option>
-            <option value="Otthon">Otthon</option>
-            <option value="Edzőterem">Edzőterem</option>
+            <option value="Outdoors">Outdoors</option>
+            <option value="Home">Home</option>
+            <option value="Gym">Gym</option>
         </select>
         <br>
-        <button type="submit">Generálás</button>
+        <button type="submit">Generate</button>
     </form>
 <script>
-    // Hetek csúszka kezelése
+    // Weeks slider handling
     const weeksSlider = document.getElementById('weeks-slider');
     const weeksOutput = document.getElementById('weeks-output');
     weeksOutput.innerHTML = weeksSlider.value;
@@ -102,7 +102,7 @@
         updateOutputPosition(weeksOutput, weeksSlider);
     };
 
-    // Fogyás (kg) csúszka kezelése
+    // Weight loss (kg) slider handling
     const weightSlider = document.getElementById('weight-slider');
     const weightOutput = document.getElementById('weight-output');
     weightOutput.innerHTML = weightSlider.value;
@@ -112,12 +112,12 @@
         updateOutputPosition(weightOutput, weightSlider);
     };
 
-    // Fogyás cél kiválasztásának kezelése
+    // Weight loss goal selection handling
     const goalSelect = document.getElementById('goal');
     const weightLabel = document.getElementById('weight-label');
 
     goalSelect.onchange = function() {
-        if (this.value === 'Fogyás') {
+        if (this.value === 'Weight loss') {
             weightLabel.style.display = 'block';
             weightSlider.style.display = 'block';
             weightOutput.style.display = 'block';
@@ -128,7 +128,7 @@
         }
     };
 
-    // Segédfüggvény a kimeneti elem pozíciójának frissítéséhez
+    // Helper function to update the position of the output element
     function updateOutputPosition(output, slider) {
         const newPosition = (slider.offsetWidth - output.offsetWidth) * (slider.value - slider.min) / (slider.max - slider.min);
         output.style.transform = 'translateX(' + newPosition + 'px)';
