@@ -60,37 +60,43 @@
             transition: background-color 0.3s ease;
         }
 
+        output {
+    position: absolute;
+    transform: translateX(-50%);
+    left: 0;
+}
+
         button:hover {
             background-color: #45a049;
         }
     </style>
 </head>
 <body>
-    <h1>Workout Plan Generator</h1>
-    <form id="workout-form" method="POST">
-        <label for="goal">Goal:</label>
-        <select name="goal" id="goal">
-            <option value="Muscle gain" selected>Muscle gain</option>
-            <option value="Weight loss">Weight loss</option>
-        </select>
-        <br>
-        <label for="weeks">Weeks:</label>
-        <input type="range" name="weeks" id="weeks-slider" min="1" max="12" value="1">
-        <output for="weeks-slider" id="weeks-output">1</output>
-        <br>
-        <label for="weight" id="weight-label">Weight loss (kg):</label>
-        <input type="range" name="weight" id="weight-slider" min="1" max="10">
-        <output for="weight-slider" id="weight-output">1</output>
-        <br>
-        <label for="location">Workout location:</label>
-        <select name="location" id="location">
-            <option value="Outdoors">Outdoors</option>
-            <option value="Home">Home</option>
-            <option value="Gym">Gym</option>
-        </select>
-        <br>
-        <button type="submit">Generate</button>
-    </form>
+<h1>Workout Plan Generator</h1>
+<form id="workout-form" method="POST">
+    <label for="goal">Goal:</label>
+    <select name="goal" id="goal">
+        <option value="Muscle gain" selected>Muscle gain</option>
+        <option value="Weight loss">Weight loss</option>
+    </select>
+    <br>
+    <label for="weeks">Weeks:</label>
+    <input type="range" name="weeks" id="weeks-slider" min="1" max="12" value="1">
+    <output for="weeks-slider" id="weeks-output">1</output>
+    <br>
+    <label for="weight" id="weight-label">Weight loss (kg):</label>
+    <input type="range" name="weight" id="weight-slider" min="1" max="10">
+    <output for="weight-slider" id="weight-output">1</output>
+    <br>
+    <label for="location">Workout location:</label>
+    <select name="location" id="location">
+        <option value="Outdoors">Outdoors</option>
+        <option value="Home">Home</option>
+        <option value="Gym">Gym</option>
+    </select>
+    <br>
+    <button type="submit">Generate</button>
+</form>
 <script>
     // Weeks slider handling
     const weeksSlider = document.getElementById('weeks-slider');
@@ -128,11 +134,13 @@
         }
     };
 
-    // Helper function to update the position of the output element
-    function updateOutputPosition(output, slider) {
-        const newPosition = (slider.offsetWidth - output.offsetWidth) * (slider.value - slider.min) / (slider.max - slider.min);
-        output.style.transform = 'translateX(' + newPosition + 'px)';
-    }
+function updateOutputPosition(output, slider) {
+    const sliderStart = slider.getBoundingClientRect().left;
+    const sliderEnd = slider.getBoundingClientRect().right;
+    const sliderWidth = sliderEnd - sliderStart;
+    const newPosition = ((slider.value - slider.min) / (slider.max - slider.min)) * sliderWidth;
+    output.style.left = (newPosition + sliderStart) + 'px';
+}
 </script>
 
 </body>
