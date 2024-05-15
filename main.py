@@ -75,10 +75,10 @@ def index():
 
 async def generate_and_send_message(weeks, goal, location, weight_to_lose=None):
     """
-    Generates and sends a message to the OpenAI API.
+    Generates and sends a message to the OpenAI API, optimizing the prompt for better results.
 
     This function checks if the workout plan parameters have changed since the last API call.
-    If they have, it calls the generate_workout_plan function to generate a new workout plan and update the cache.
+    If they have, it calls the `generate_workout_plan` function with an optimized prompt to generate a new workout plan and update the cache.
     If the parameters have not changed, it returns the cached response.
 
     Args:
@@ -91,41 +91,44 @@ async def generate_and_send_message(weeks, goal, location, weight_to_lose=None):
         list: The formatted workout plan.
     """
     global response_cache, last_plan_parameters
+
     new_plan_parameters = (weeks, goal, location, weight_to_lose)
+
     if response_cache is None or last_plan_parameters != new_plan_parameters:
-        response_cache = await generate_workout_plan(weeks, goal, location, weight_to_lose)
+        # Optimize the prompt for better results
+        if goal == "Weight loss":
+            prompt = f"Create a detailed {weeks}-week workout plan to help the user lose {weight_to_lose} kilograms at {location}. The plan should include a mix of cardio, strength training, and flexibility exercises tailored to the user's fitness level and goals."
+        elif goal == "Muscle gain":
+            prompt = f"Create a comprehensive {weeks}-week workout plan to help the user gain muscle mass at {location}. The plan should include a progressive resistance training program, along with complementary cardio and recovery activities."
+        else:
+            prompt = f"Create a {weeks}-week workout plan for the user at {location} that focuses on their goal of {goal}."
+
+        response_cache = await generate_workout_plan(prompt)
         last_plan_parameters = new_plan_parameters
+
     return response_cache
 
-async def generate_workout_plan(weeks, goal, location, weight_to_lose=None):
+async def generate_workout_plan(prompt):
     """
-    Generates a workout plan using the OpenAI API.
+    Generates a workout plan using the OpenAI API with the provided prompt.
 
-    This function creates a message based on the user's fitness goal, location, and the number of weeks they want the plan to last.
-    It then sends this message to the OpenAI API and waits for the API to generate a workout plan.
+    This function sends the prompt to the OpenAI API and waits for the API to generate a workout plan.
     Once the plan is generated, it is formatted for display in the HTML template.
 
     Args:
-        weeks (int): The number of weeks for the workout plan.
-        goal (str): The fitness goal for the workout plan. Can be "Weight loss" or "Muscle gain".
-        location (str): The location where the workouts will be performed.
-        weight_to_lose (int, optional): The amount of weight to lose in kilograms. Only required if the goal is "Weight loss".
+        prompt (str): The prompt to be sent to the OpenAI API.
 
     Returns:
         list: The formatted workout plan.
     """
-    if goal == "Weight loss":
-        message = f"Create a {weeks}-week workout plan to lose {weight_to_lose} kilograms at {location}."
-    elif goal == "Muscle gain":
-        message = f"Create a {weeks}-week workout plan for muscle gain at {location}."
-
-    send_message_to_thread(message)
+    send_message_to_thread(prompt)
     run = client.beta.threads.runs.create(thread_id=thread_id, assistant_id=assistant_id,
-                                          instructions="Please generate a workout plan")
+                                          instructions="Please generate a workout plan based on the provided prompt.")
     await wait_for_run_completion_async(client=client, thread_id=thread_id, run_id=run.id)
     response = await get_last_message_async()
     formatted_response = format_workout_plan(response)
     return formatted_response
+
 
 def send_message_to_thread(message):
     """
